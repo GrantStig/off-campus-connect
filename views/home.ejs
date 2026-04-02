@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Off Campus Connect</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <span class="icon">🏠</span>
+            Off Campus Connect
+        </a>
+        <div class="nav-links">
+            <a href="/" class="active">Home</a>
+            <a href="/properties">Properties</a>
+            <a href="/reviews">Reviews</a>
+            <a href="/users">Users</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Off Campus Connect</h1>
+            <p>Find your perfect off-campus housing near Virginia Tech. Browse listings, read reviews, and connect with landlords.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.users %></div>
+                <div class="stat-label">Registered Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.properties %></div>
+                <div class="stat-label">Property Listings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.reviews %></div>
+                <div class="stat-label">Reviews Posted</div>
+            </div>
+        </div>
+
+        <h2 style="font-size: 1.2rem; margin-bottom: 1rem; font-weight: 600;">Manage</h2>
+        <div class="quick-links">
+            <a href="/properties" class="quick-link">
+                <div class="ql-icon">🏘️</div>
+                <div class="ql-text">
+                    <h3>Properties</h3>
+                    <p>Add, edit, or remove listings</p>
+                </div>
+            </a>
+            <a href="/reviews" class="quick-link">
+                <div class="ql-icon">⭐</div>
+                <div class="ql-text">
+                    <h3>Reviews</h3>
+                    <p>Manage tenant reviews</p>
+                </div>
+            </a>
+            <a href="/users" class="quick-link">
+                <div class="ql-icon">👤</div>
+                <div class="ql-text">
+                    <h3>Users</h3>
+                    <p>Manage user accounts</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews — Off Campus Connect</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <span class="icon">🏠</span>
+            Off Campus Connect
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/properties">Properties</a>
+            <a href="/reviews" class="active">Reviews</a>
+            <a href="/users">Users</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Reviews</h1>
+            <p>Property reviews from students and tenants</p>
+        </div>
+
+        <% if (success) { %>
+            <div class="alert alert-success">✓ <%= success %></div>
+        <% } %>
+        <% if (error) { %>
+            <div class="alert alert-error">✕ <%= error %></div>
+        <% } %>
+
+        <!-- ADD REVIEW FORM -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h2>Write a Review</h2>
+            </div>
+            <form action="/reviews/add" method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Reviewer</label>
+                        <select name="user_id" required>
+                            <option value="">Select user...</option>
+                            <% users.forEach(u => { %>
+                                <option value="<%= u.user_id %>"><%= u.username %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Property</label>
+                        <select name="property_id" required>
+                            <option value="">Select property...</option>
+                            <% properties.forEach(p => { %>
+                                <option value="<%= p.property_id %>"><%= p.address %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <select name="rating" required>
+                            <option value="">Select rating...</option>
+                            <option value="5">★★★★★ (5 — Excellent)</option>
+                            <option value="4">★★★★☆ (4 — Great)</option>
+                            <option value="3">★★★☆☆ (3 — Average)</option>
+                            <option value="2">★★☆☆☆ (2 — Poor)</option>
+                            <option value="1">★☆☆☆☆ (1 — Terrible)</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Comment</label>
+                        <textarea name="comment" placeholder="Share your experience..." required></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">+ Submit Review</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- REVIEWS TABLE -->
+        <div class="card">
+            <div class="card-header">
+                <h2>All Reviews (<%= reviews.length %>)</h2>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Property</th>
+                            <th>Rating</th>
+                            <th>Comment</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% reviews.forEach(r => { %>
+                        <tr>
+                            <td><%= r.review_id %></td>
+                            <td><strong><%= r.username %></strong></td>
+                            <td><%= r.address %></td>
+                            <td><span class="stars"><%= '★'.repeat(r.rating) %><%= '☆'.repeat(5 - r.rating) %></span></td>
+                            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= r.comment %></td>
+                            <td><%= new Date(r.created_date).toLocaleDateString() %></td>
+                            <td class="actions">
+                                <button class="btn btn-outline btn-sm edit-review-btn"
+                                    data-id="<%= r.review_id %>"
+                                    data-rating="<%= r.rating %>"
+                                    data-comment="<%= (r.comment || '').replace(/"/g, '&quot;') %>"
+                                >Edit</button>
+                                <form action="/reviews/delete/<%= r.review_id %>" method="POST" style="display:inline" onsubmit="return confirm('Delete this review?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal-backdrop" id="editModal">
+        <div class="modal">
+            <h2>Edit Review</h2>
+            <form id="editForm" method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <select name="rating" id="edit_rating" required>
+                            <option value="5">★★★★★ (5 — Excellent)</option>
+                            <option value="4">★★★★☆ (4 — Great)</option>
+                            <option value="3">★★★☆☆ (3 — Average)</option>
+                            <option value="2">★★☆☆☆ (2 — Poor)</option>
+                            <option value="1">★☆☆☆☆ (1 — Terrible)</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Comment</label>
+                        <textarea name="comment" id="edit_comment" required></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.edit-review-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('editForm').action = '/reviews/update/' + this.dataset.id;
+                document.getElementById('edit_rating').value = this.dataset.rating;
+                document.getElementById('edit_comment').value = this.dataset.comment || '';
+                document.getElementById('editModal').classList.add('open');
+            });
+        });
+
+        function closeModal() {
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+        }
+
+        document.querySelectorAll('.modal-backdrop').forEach(m => {
+            m.addEventListener('click', (e) => { if (e.target === m) closeModal(); });
+        });
+    </script>
+</body>
+</html>
