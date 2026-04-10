@@ -1,9 +1,10 @@
 {
   "name": "off-campus-connect",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Off Campus Connect course project",
+  "main": "backend/app.js",
   "scripts": {
+    "start": "node backend/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
