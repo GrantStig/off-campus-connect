@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compatibility — Off Campus Connect</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <span class="icon">🏠</span>
+            Off Campus Connect
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/properties">Properties</a>
+            <a href="/reviews">Reviews</a>
+            <a href="/users">Users</a>
+            <a href="/compatibility" class="active">Compatibility</a>
+            <a href="/reports">Reports</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Roommate Compatibility</h1>
+            <p>Find your most compatible potential roommates based on lifestyle preferences and budget</p>
+        </div>
+
+        <!-- STUDENT PICKER -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h2>Select a Student</h2>
+            </div>
+            <form action="/compatibility" method="GET">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Student</label>
+                        <select name="student_id" onchange="this.form.submit()" required>
+                            <option value="">— Choose a student —</option>
+                            <% students.forEach(s => { %>
+                                <option value="<%= s.student_id %>" <%= selectedStudent && selectedStudent.student_id == s.student_id ? 'selected' : '' %>>
+                                    <%= s.username %> (<%= s.major %>, Class of <%= s.graduation_year %>)
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <% if (selectedStudent) { %>
+            <!-- SELECTED STUDENT PROFILE -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2>Profile: <%= selectedStudent.username %></h2>
+                </div>
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <span class="profile-label">Major</span>
+                        <span class="profile-value"><%= selectedStudent.major %></span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Graduation</span>
+                        <span class="profile-value"><%= selectedStudent.graduation_year %></span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Budget Range</span>
+                        <span class="profile-value">$<%= selectedStudent.budget_min %> – $<%= selectedStudent.budget_max %></span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Pets</span>
+                        <span class="profile-value"><%= selectedStudent.pets_allowed ? '✓ OK with pets' : '✕ No pets' %></span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Smoking</span>
+                        <span class="profile-value"><%= selectedStudent.smoking_allowed ? '✓ OK with smoking' : '✕ No smoking' %></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MATCHES TABLE -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Top Matches (<%= matches.length %>)</h2>
+                </div>
+                <% if (matches.length === 0) { %>
+                    <p style="color: var(--text-muted); padding: 1rem 0;">No compatibility data available for this student yet.</p>
+                <% } else { %>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student</th>
+                                    <th>Major</th>
+                                    <th>Class</th>
+                                    <th>Budget</th>
+                                    <th>Pets</th>
+                                    <th>Smoking</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% matches.forEach((m, i) => { %>
+                                <tr>
+                                    <td><strong>#<%= i + 1 %></strong></td>
+                                    <td><strong><%= m.username %></strong></td>
+                                    <td><%= m.major %></td>
+                                    <td><%= m.graduation_year %></td>
+                                    <td>$<%= m.budget_min %> – $<%= m.budget_max %></td>
+                                    <td><%= m.pets_allowed ? '✓' : '✕' %></td>
+                                    <td><%= m.smoking_allowed ? '✓' : '✕' %></td>
+                                    <td>
+                                        <%
+                                            let scoreClass = 'score-low';
+                                            if (m.score >= 80) scoreClass = 'score-high';
+                                            else if (m.score >= 60) scoreClass = 'score-mid';
+                                        %>
+                                        <span class="score-badge <%= scoreClass %>">
+                                            <%= parseFloat(m.score).toFixed(1) %>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } %>
+            </div>
+        <% } else { %>
+            <div class="card">
+                <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                    Select a student above to see their top compatibility matches.
+                </p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

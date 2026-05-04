@@ -513,3 +513,48 @@ tbody tr:last-child td {
     .container { padding: 1.5rem 1rem; }
     .hero h1 { font-size: 1.75rem; }
 }
+
+
+/* ---- COMPATIBILITY PAGE ---- */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.profile-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.85rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.profile-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.profile-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+}
+
+.score-high { background: #D1FAE5; color: #065F46; }
+.score-mid  { background: #FEF3C7; color: #92400E; }
+.score-low  { background: #FEE2E2; color: #991B1B; }

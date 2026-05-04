@@ -245,6 +245,51 @@ app.get('/reports', (req, res) => {
     });
 });
 
+// Compatibility
+app.get('/compatibility', (req, res) => {
+    // Get all students for the dropdown
+    const studentsSql = `
+        SELECT sp.student_id, u.username, sp.major, sp.graduation_year,
+               sp.budget_min, sp.budget_max, sp.pets_allowed, sp.smoking_allowed
+        FROM Student_Profile sp
+        JOIN User u ON sp.user_id = u.user_id
+        ORDER BY u.username
+    `;
+    db.query(studentsSql, (err, students) => {
+        if (err) return res.status(500).send('Database error');
+
+        const selectedId = req.query.student_id;
+        if (!selectedId) {
+            return res.render('compatibility', { students, selectedStudent: null, matches: [] });
+        }
+
+        const selectedStudent = students.find(s => s.student_id == selectedId);
+        if (!selectedStudent) {
+            return res.render('compatibility', { students, selectedStudent: null, matches: [] });
+        }
+
+        // Get matches: pull from Compatibility_Score where this student is either id_1 or id_2
+        const matchesSql = `
+            SELECT cs.score,
+                   sp.student_id, u.username, sp.major, sp.graduation_year,
+                   sp.budget_min, sp.budget_max, sp.pets_allowed, sp.smoking_allowed
+            FROM Compatibility_Score cs
+            JOIN Student_Profile sp
+                ON sp.student_id = CASE
+                    WHEN cs.student_id_1 = ? THEN cs.student_id_2
+                    ELSE cs.student_id_1
+                END
+            JOIN User u ON sp.user_id = u.user_id
+            WHERE cs.student_id_1 = ? OR cs.student_id_2 = ?
+            ORDER BY cs.score DESC
+        `;
+        db.query(matchesSql, [selectedId, selectedId, selectedId], (err, matches) => {
+            if (err) return res.status(500).send('Database error');
+            res.render('compatibility', { students, selectedStudent, matches });
+        });
+    });
+});
+
 app.listen(3000, () => {
     console.log('Server running at http://localhost:3000');
 });
