@@ -1,10 +1,12 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const db = require('./db');
 
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../frontend/views'));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 // Home
 app.get('/', (req, res) => {
@@ -207,6 +209,38 @@ app.post('/users/delete/:id', (req, res) => {
                     });
                 });
             });
+        });
+    });
+});
+
+app.get('/reports', (req, res) => {
+    const sql1 = `
+        SELECT p.address, p.city, lp.company_name AS landlord,
+               p.rent_price, p.bedroom_count, p.bathroom_count,
+               COUNT(r.review_id) AS total_reviews,
+               ROUND(AVG(r.rating), 2) AS avg_rating
+        FROM Property p
+        JOIN Landlord_Profile lp ON p.landlord_id = lp.landlord_id
+        LEFT JOIN Review r ON r.property_id = p.property_id
+        GROUP BY p.property_id
+        ORDER BY avg_rating DESC
+    `;
+    const sql2 = `
+        SELECT u.username AS landlord, lp.company_name,
+               COUNT(p.property_id) AS total_properties,
+               SUM(p.available = TRUE) AS available_units,
+               ROUND(AVG(p.rent_price), 2) AS avg_rent
+        FROM User u
+        JOIN Landlord_Profile lp ON lp.landlord_id = u.user_id
+        LEFT JOIN Property p ON p.landlord_id = u.user_id
+        GROUP BY u.user_id
+        ORDER BY total_properties DESC
+    `;
+    db.query(sql1, (err, propertyRatings) => {
+        if (err) return res.status(500).send('Database error: ' + err.message);
+        db.query(sql2, (err, landlordSummary) => {
+            if (err) return res.status(500).send('Database error: ' + err.message);
+            res.render('reports', { propertyRatings, landlordSummary });
         });
     });
 });
