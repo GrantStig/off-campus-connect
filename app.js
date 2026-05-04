@@ -39,11 +39,20 @@ app.get('/properties', (req, res) => {
 
 app.post('/properties/add', (req, res) => {
     const { landlord_id, address, city, state, zip, rent_price, bedroom_count, bathroom_count, available, description } = req.body;
-    const sql = `INSERT INTO Property (landlord_id, address, city, state, zip, rent_price, bedroom_count, bathroom_count, available, description)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    db.query(sql, [landlord_id, address, city, state, zip, rent_price, bedroom_count, bathroom_count, available ? 1 : 0, description], (err) => {
+
+    // Reset AUTO_INCREMENT to MAX(property_id)+1 so deleted IDs are reused
+    db.query('SELECT COALESCE(MAX(property_id), 0) + 1 AS next_id FROM Property', (err, rows) => {
         if (err) return res.redirect('/properties?error=Failed to add property');
-        res.redirect('/properties?success=Property added successfully');
+        db.query(`ALTER TABLE Property AUTO_INCREMENT = ${rows[0].next_id}`, (err) => {
+            if (err) return res.redirect('/properties?error=Failed to add property');
+
+            const sql = `INSERT INTO Property (landlord_id, address, city, state, zip, rent_price, bedroom_count, bathroom_count, available, description)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            db.query(sql, [landlord_id, address, city, state, zip, rent_price, bedroom_count, bathroom_count, available ? 1 : 0, description], (err) => {
+                if (err) return res.redirect('/properties?error=Failed to add property');
+                res.redirect('/properties?success=Property added successfully');
+            });
+        });
     });
 });
 
@@ -118,10 +127,19 @@ app.get('/reviews', (req, res) => {
 
 app.post('/reviews/add', (req, res) => {
     const { user_id, property_id, rating, comment } = req.body;
-    const sql = `INSERT INTO Review (user_id, property_id, rating, comment) VALUES (?, ?, ?, ?)`;
-    db.query(sql, [user_id, property_id, rating, comment], (err) => {
+
+    // Reset AUTO_INCREMENT to MAX(review_id)+1 so deleted IDs are reused
+    db.query('SELECT COALESCE(MAX(review_id), 0) + 1 AS next_id FROM Review', (err, rows) => {
         if (err) return res.redirect('/reviews?error=Failed to add review');
-        res.redirect('/reviews?success=Review added successfully');
+        db.query(`ALTER TABLE Review AUTO_INCREMENT = ${rows[0].next_id}`, (err) => {
+            if (err) return res.redirect('/reviews?error=Failed to add review');
+
+            const sql = `INSERT INTO Review (user_id, property_id, rating, comment) VALUES (?, ?, ?, ?)`;
+            db.query(sql, [user_id, property_id, rating, comment], (err) => {
+                if (err) return res.redirect('/reviews?error=Failed to add review');
+                res.redirect('/reviews?success=Review added successfully');
+            });
+        });
     });
 });
 
@@ -152,10 +170,19 @@ app.get('/users', (req, res) => {
 
 app.post('/users/add', (req, res) => {
     const { username, email, user_type } = req.body;
-    const sql = `INSERT INTO User (username, email, user_type) VALUES (?, ?, ?)`;
-    db.query(sql, [username, email, user_type], (err) => {
-        if (err) return res.redirect('/users?error=Failed to add user (username or email may already exist)');
-        res.redirect('/users?success=User added successfully');
+
+    // Reset AUTO_INCREMENT to MAX(user_id)+1 so deleted IDs are reused
+    db.query('SELECT COALESCE(MAX(user_id), 0) + 1 AS next_id FROM User', (err, rows) => {
+        if (err) return res.redirect('/users?error=Failed to add user');
+        db.query(`ALTER TABLE User AUTO_INCREMENT = ${rows[0].next_id}`, (err) => {
+            if (err) return res.redirect('/users?error=Failed to add user');
+
+            const sql = `INSERT INTO User (username, email, user_type) VALUES (?, ?, ?)`;
+            db.query(sql, [username, email, user_type], (err) => {
+                if (err) return res.redirect('/users?error=Failed to add user (username or email may already exist)');
+                res.redirect('/users?success=User added successfully');
+            });
+        });
     });
 });
 
